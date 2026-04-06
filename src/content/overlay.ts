@@ -200,6 +200,22 @@ const renderPins = () => {
     pin.dataset.commentId = comment.id;
     pin.textContent = comment.resolved ? '✓' : '●';
 
+    // 핀 호버 시 앵커 요소 하이라이트
+    pin.addEventListener('mouseenter', () => {
+      const m = findAnchor(comment.anchor);
+      if (m.element) {
+        const r = m.element.getBoundingClientRect();
+        highlight.style.display = 'block';
+        highlight.style.top = `${r.top + window.scrollY}px`;
+        highlight.style.left = `${r.left + window.scrollX}px`;
+        highlight.style.width = `${r.width}px`;
+        highlight.style.height = `${r.height}px`;
+      }
+    });
+    pin.addEventListener('mouseleave', () => {
+      highlight.style.display = 'none';
+    });
+
     // 핀 클릭 시 댓글 상세 표시
     pin.addEventListener('click', () => showCommentDetail(comment, pin));
 
