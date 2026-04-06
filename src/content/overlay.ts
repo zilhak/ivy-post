@@ -192,7 +192,43 @@ const onClick = (e: MouseEvent) => {
   // 깊이 조절된 요소 사용
   const selectedElement = hoveredElement || target;
   const anchor = collectAnchor(selectedElement);
-  showActionPopup(anchor, selectedElement);
+  showActionPopup(anchor, selectedElement, e.clientX, e.clientY);
+};
+
+/** ──────────────────────────────────────
+ *  팝업 위치 결정 — 클릭 좌표 기준, 뷰포트 밖이면 반전
+ *  ────────────────────────────────────── */
+const positionPopup = (popup: HTMLElement, clientX: number, clientY: number) => {
+  // 먼저 보이지 않게 배치해서 크기 측정
+  popup.style.visibility = 'hidden';
+  popup.style.top = '0';
+  popup.style.left = '0';
+  container.appendChild(popup);
+
+  const popupRect = popup.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const gap = 8;
+
+  // 세로: 기본 아래쪽, 공간 부족하면 위쪽
+  let top: number;
+  if (clientY + gap + popupRect.height <= vh) {
+    top = clientY + gap + window.scrollY;
+  } else {
+    top = clientY - gap - popupRect.height + window.scrollY;
+  }
+
+  // 가로: 기본 오른쪽, 공간 부족하면 왼쪽
+  let left: number;
+  if (clientX + popupRect.width <= vw) {
+    left = clientX + window.scrollX;
+  } else {
+    left = clientX - popupRect.width + window.scrollX;
+  }
+
+  popup.style.top = `${top}px`;
+  popup.style.left = `${left}px`;
+  popup.style.visibility = '';
 };
 
 /** ──────────────────────────────────────
@@ -200,16 +236,15 @@ const onClick = (e: MouseEvent) => {
  *  ────────────────────────────────────── */
 const showActionPopup = (
   anchor: ReturnType<typeof collectAnchor>,
-  targetEl: Element
+  targetEl: Element,
+  clientX: number,
+  clientY: number,
 ) => {
   setPinMode(false);
   updateHighlight(targetEl);
 
-  const rect = targetEl.getBoundingClientRect();
   const popup = document.createElement('div');
   popup.className = 'ivypost-action-popup';
-  popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
-  popup.style.left = `${rect.left + window.scrollX}px`;
 
   popup.innerHTML = `
     <div class="ivypost-action-popup-header">
@@ -230,10 +265,10 @@ const showActionPopup = (
 
   popup.querySelector('[data-action="comment"]')!.addEventListener('click', () => {
     popup.remove();
-    showCommentPopup(anchor, targetEl);
+    showCommentPopup(anchor, targetEl, clientX, clientY);
   });
 
-  container.appendChild(popup);
+  positionPopup(popup, clientX, clientY);
 };
 
 /** ──────────────────────────────────────
@@ -241,16 +276,15 @@ const showActionPopup = (
  *  ────────────────────────────────────── */
 const showCommentPopup = (
   anchor: ReturnType<typeof collectAnchor>,
-  targetEl: Element
+  targetEl: Element,
+  clientX: number,
+  clientY: number,
 ) => {
   // 하이라이트 유지
   updateHighlight(targetEl);
 
-  const rect = targetEl.getBoundingClientRect();
   const popup = document.createElement('div');
   popup.className = 'ivypost-popup';
-  popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
-  popup.style.left = `${rect.left + window.scrollX}px`;
 
   popup.innerHTML = `
     <div class="ivypost-popup-header">
@@ -312,7 +346,7 @@ const showCommentPopup = (
     renderPins();
   });
 
-  container.appendChild(popup);
+  positionPopup(popup, clientX, clientY);
   textarea.focus();
 };
 
