@@ -5,7 +5,8 @@
   "description": "QA 화면 댓글 도구 — 웹 화면 위에 핀을 찍고 피드백을 남기세요",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "action": {
     "default_popup": "popup.html",
