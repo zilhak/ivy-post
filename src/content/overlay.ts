@@ -63,19 +63,82 @@ highlight.className = 'ivypost-highlight';
 highlight.style.display = 'none';
 container.appendChild(highlight);
 
-const onMouseMove = (e: MouseEvent) => {
-  if (!pinModeActive) return;
-
-  const target = e.target as Element;
-  if (host.contains(target)) return; // IvyPost UI 자체는 무시
-
-  hoveredElement = target;
-  const rect = target.getBoundingClientRect();
+/** 하이라이트 위치를 요소에 맞춰 갱신 */
+const updateHighlight = (el: Element) => {
+  const rect = el.getBoundingClientRect();
   highlight.style.display = 'block';
   highlight.style.top = `${rect.top + window.scrollY}px`;
   highlight.style.left = `${rect.left + window.scrollX}px`;
   highlight.style.width = `${rect.width}px`;
   highlight.style.height = `${rect.height}px`;
+};
+
+/** 깊이 표시 배지 */
+const depthBadge = document.createElement('div');
+depthBadge.className = 'ivypost-depth-badge';
+depthBadge.style.display = 'none';
+container.appendChild(depthBadge);
+
+/** 마우스 아래의 원본(가장 깊은) 요소 */
+let baseElement: Element | null = null;
+/** 현재 깊이 오프셋 (0 = 원본, 양수 = 부모 방향) */
+let depthOffset = 0;
+
+/** baseElement에서 depthOffset만큼 부모로 올라간 요소 반환 */
+const getElementAtDepth = (): Element | null => {
+  let el = baseElement;
+  for (let i = 0; i < depthOffset && el?.parentElement; i++) {
+    if (el.parentElement === document.body || el.parentElement === document.documentElement) break;
+    el = el.parentElement;
+  }
+  return el;
+};
+
+const onMouseMove = (e: MouseEvent) => {
+  if (!pinModeActive) return;
+
+  const target = e.target as Element;
+  if (host.contains(target)) return;
+
+  // 마우스가 새 요소로 이동하면 깊이 리셋
+  baseElement = target;
+  depthOffset = 0;
+  hoveredElement = target;
+  updateHighlight(target);
+  depthBadge.style.display = 'none';
+};
+
+const onKeyDown = (e: KeyboardEvent) => {
+  if (!pinModeActive || !baseElement) return;
+
+  if (e.key === '=' || e.key === '+') {
+    // 더 깊은 요소 (자식 방향)
+    e.preventDefault();
+    if (depthOffset > 0) {
+      depthOffset--;
+      hoveredElement = getElementAtDepth();
+      if (hoveredElement) updateHighlight(hoveredElement);
+      depthBadge.textContent = depthOffset === 0 ? '' : `↑${depthOffset}`;
+      depthBadge.style.display = depthOffset === 0 ? 'none' : 'block';
+    }
+  } else if (e.key === '-') {
+    // 더 얕은 요소 (부모 방향)
+    e.preventDefault();
+    const current = getElementAtDepth();
+    if (current?.parentElement && current.parentElement !== document.body && current.parentElement !== document.documentElement) {
+      depthOffset++;
+      hoveredElement = getElementAtDepth();
+      if (hoveredElement) updateHighlight(hoveredElement);
+      depthBadge.textContent = `↑${depthOffset}`;
+      depthBadge.style.display = 'block';
+    }
+  }
+
+  // 깊이 배지 위치를 하이라이트 옆에
+  if (depthBadge.style.display !== 'none') {
+    depthBadge.style.top = highlight.style.top;
+    depthBadge.style.left = `${parseInt(highlight.style.left) + parseInt(highlight.style.width) + 4}px`;
+  }
 };
 
 const onClick = (e: MouseEvent) => {
@@ -87,8 +150,10 @@ const onClick = (e: MouseEvent) => {
   e.preventDefault();
   e.stopPropagation();
 
-  const anchor = collectAnchor(target);
-  showCommentPopup(anchor, target);
+  // 깊이 조절된 요소 사용
+  const selectedElement = hoveredElement || target;
+  const anchor = collectAnchor(selectedElement);
+  showCommentPopup(anchor, selectedElement);
 };
 
 /** ──────────────────────────────────────
@@ -98,8 +163,9 @@ const showCommentPopup = (
   anchor: ReturnType<typeof collectAnchor>,
   targetEl: Element
 ) => {
-  // 핀 모드 해제
+  // 핀 모드 해제 (하이라이트는 유지)
   setPinMode(false);
+  updateHighlight(targetEl);
 
   const rect = targetEl.getBoundingClientRect();
   const popup = document.createElement('div');
@@ -119,7 +185,10 @@ const showCommentPopup = (
     </div>
   `;
 
-  const close = () => popup.remove();
+  const close = () => {
+    popup.remove();
+    highlight.style.display = 'none';
+  };
   popup.querySelector('.ivypost-popup-close')!.addEventListener('click', close);
 
   const authorInput = popup.querySelector('.ivypost-popup-author') as HTMLInputElement;
@@ -277,7 +346,10 @@ let pinCursorStyle: HTMLStyleElement | null = null;
 const setPinMode = (active: boolean) => {
   pinModeActive = active;
   highlight.style.display = 'none';
+  depthBadge.style.display = 'none';
   hoveredElement = null;
+  baseElement = null;
+  depthOffset = 0;
   container.dataset.pinMode = String(active);
 
   if (active) {
@@ -288,6 +360,7 @@ const setPinMode = (active: boolean) => {
 
     document.addEventListener('mousemove', onMouseMove, true);
     document.addEventListener('click', onClick, true);
+    document.addEventListener('keydown', onKeyDown, true);
   } else {
     // 커서 복원
     if (pinCursorStyle) {
@@ -297,6 +370,7 @@ const setPinMode = (active: boolean) => {
 
     document.removeEventListener('mousemove', onMouseMove, true);
     document.removeEventListener('click', onClick, true);
+    document.removeEventListener('keydown', onKeyDown, true);
   }
 };
 
