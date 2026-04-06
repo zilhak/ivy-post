@@ -8,10 +8,12 @@
   font-size: 14px;
   line-height: 1.5;
   color: #1a1a1a;
+  pointer-events: none;
 }
 
 /* ── 상태 배지 ── */
 .ivypost-badge {
+  pointer-events: auto;
   position: fixed;
   bottom: 16px;
   right: 16px;
@@ -59,6 +61,7 @@
 
 /* ── 핀 ── */
 .ivypost-pin {
+  pointer-events: auto;
   position: absolute;
   z-index: 2147483645;
   width: 24px;
@@ -91,6 +94,7 @@
 
 /* ── 댓글 입력 팝업 ── */
 .ivypost-popup {
+  pointer-events: auto;
   position: absolute;
   z-index: 2147483647;
   width: 300px;
@@ -179,6 +183,7 @@
 
 /* ── 댓글 상세 ── */
 .ivypost-detail {
+  pointer-events: auto;
   position: absolute;
   z-index: 2147483647;
   width: 320px;
