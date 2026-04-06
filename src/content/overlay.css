@@ -47,11 +47,12 @@
 .ivypost-highlight {
   position: absolute;
   z-index: 2147483646;
-  border: 2px solid #6366f1;
+  outline: 2px solid #6366f1;
   background: rgba(99, 102, 241, 0.1);
   pointer-events: none;
   border-radius: 4px;
-  transition: all 0.05s ease-out;
+  transition: top 0.05s ease-out, left 0.05s ease-out, width 0.05s ease-out, height 0.05s ease-out;
+  box-sizing: border-box;
 }
 
 /* ── 핀 ── */
