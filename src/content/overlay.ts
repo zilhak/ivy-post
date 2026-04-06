@@ -257,6 +257,9 @@ const showCommentDetail = (comment: Comment, pinEl: Element) => {
 /** ──────────────────────────────────────
  *  핀 모드 토글
  *  ────────────────────────────────────── */
+/** 핀 모드 전용 style 태그 (페이지에 직접 삽입/제거) */
+let pinCursorStyle: HTMLStyleElement | null = null;
+
 const setPinMode = (active: boolean) => {
   pinModeActive = active;
   highlight.style.display = 'none';
@@ -264,9 +267,20 @@ const setPinMode = (active: boolean) => {
   container.dataset.pinMode = String(active);
 
   if (active) {
+    // 페이지 커서를 crosshair로 변경
+    pinCursorStyle = document.createElement('style');
+    pinCursorStyle.textContent = '*, *::before, *::after { cursor: crosshair !important; }';
+    document.head.appendChild(pinCursorStyle);
+
     document.addEventListener('mousemove', onMouseMove, true);
     document.addEventListener('click', onClick, true);
   } else {
+    // 커서 복원
+    if (pinCursorStyle) {
+      pinCursorStyle.remove();
+      pinCursorStyle = null;
+    }
+
     document.removeEventListener('mousemove', onMouseMove, true);
     document.removeEventListener('click', onClick, true);
   }

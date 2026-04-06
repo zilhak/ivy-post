@@ -54,11 +54,6 @@
   transition: all 0.05s ease-out;
 }
 
-/* 핀 모드 활성 시 커서 변경 */
-#ivypost-container[data-pin-mode='true'] ~ * {
-  cursor: crosshair !important;
-}
-
 /* ── 핀 ── */
 .ivypost-pin {
   pointer-events: auto;
