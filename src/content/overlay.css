@@ -102,6 +102,51 @@
   opacity: 0.7;
 }
 
+/* ── 액션 팝업 (1차 메뉴) ── */
+.ivypost-action-popup {
+  pointer-events: auto;
+  position: absolute;
+  z-index: 2147483647;
+  min-width: 180px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.ivypost-action-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #9ca3af;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ivypost-action-menu {
+  padding: 4px;
+}
+
+.ivypost-action-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: #1a1a1a;
+}
+
+.ivypost-action-item:hover {
+  background: #f3f4f6;
+}
+
 /* ── 댓글 입력 팝업 ── */
 .ivypost-popup {
   pointer-events: auto;

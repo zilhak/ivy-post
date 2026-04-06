@@ -192,7 +192,48 @@ const onClick = (e: MouseEvent) => {
   // 깊이 조절된 요소 사용
   const selectedElement = hoveredElement || target;
   const anchor = collectAnchor(selectedElement);
-  showCommentPopup(anchor, selectedElement);
+  showActionPopup(anchor, selectedElement);
+};
+
+/** ──────────────────────────────────────
+ *  액션 팝업 (1차 메뉴)
+ *  ────────────────────────────────────── */
+const showActionPopup = (
+  anchor: ReturnType<typeof collectAnchor>,
+  targetEl: Element
+) => {
+  setPinMode(false);
+  updateHighlight(targetEl);
+
+  const rect = targetEl.getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.className = 'ivypost-action-popup';
+  popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
+  popup.style.left = `${rect.left + window.scrollX}px`;
+
+  popup.innerHTML = `
+    <div class="ivypost-action-popup-header">
+      <span>&lt;${anchor.tagName.toLowerCase()}&gt;</span>
+      <button class="ivypost-popup-close">&times;</button>
+    </div>
+    <div class="ivypost-action-menu">
+      <button class="ivypost-action-item" data-action="comment">댓글 작성</button>
+    </div>
+  `;
+
+  const close = () => {
+    popup.remove();
+    highlight.style.display = 'none';
+  };
+
+  popup.querySelector('.ivypost-popup-close')!.addEventListener('click', close);
+
+  popup.querySelector('[data-action="comment"]')!.addEventListener('click', () => {
+    popup.remove();
+    showCommentPopup(anchor, targetEl);
+  });
+
+  container.appendChild(popup);
 };
 
 /** ──────────────────────────────────────
@@ -202,8 +243,7 @@ const showCommentPopup = (
   anchor: ReturnType<typeof collectAnchor>,
   targetEl: Element
 ) => {
-  // 핀 모드 해제 (하이라이트는 유지)
-  setPinMode(false);
+  // 하이라이트 유지
   updateHighlight(targetEl);
 
   const rect = targetEl.getBoundingClientRect();
