@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "bun run build --watch",
     "build": "bun run scripts/build.ts",
+    "test": "bun test",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
+    "happy-dom": "^20.8.9",
     "sharp": "^0.34.5",
     "typescript": "^5.7.0"
   }
