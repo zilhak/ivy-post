@@ -35,7 +35,8 @@
   "commands": {
     "toggle-pin-mode": {
       "suggested_key": {
-        "default": "Alt+Shift+P"
+        "default": "Ctrl+Shift+P",
+        "mac": "MacCtrl+Shift+P"
       },
       "description": "핀 모드 토글"
     }
