@@ -5,14 +5,10 @@ const sendToContent = async (tabId: number, msg: unknown) => {
   try {
     await chrome.tabs.sendMessage(tabId, msg);
   } catch {
-    // content script 미로드 → 주입 후 재전송
+    // content script 미로드 → 주입 후 재전송 (CSS는 JS에 인라인)
     await chrome.scripting.executeScript({
       target: { tabId },
       files: ['content.js'],
-    });
-    await chrome.scripting.insertCSS({
-      target: { tabId },
-      files: ['overlay.css'],
     });
     await chrome.tabs.sendMessage(tabId, msg);
   }

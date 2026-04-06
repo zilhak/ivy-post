@@ -2,6 +2,8 @@ import { collectAnchor, findAnchor } from '../lib/anchor';
 import { createComment, fetchComments, getServerStatus } from '../lib/api';
 import { getLocal, saveLocal } from '../lib/storage';
 import type { Comment, CommentCreate } from '../lib/types';
+// @ts-ignore — CSS는 빌드 시 text loader로 문자열 변환됨
+import cssText from './overlay.css';
 
 /** ──────────────────────────────────────
  *  Shadow DOM 호스트 생성
@@ -11,17 +13,13 @@ host.id = 'ivypost-root';
 host.style.position = 'absolute';
 host.style.top = '0';
 host.style.left = '0';
-host.style.width = '0';
-host.style.height = '0';
-host.style.overflow = 'visible';
 host.style.pointerEvents = 'none';
 host.style.zIndex = '2147483647';
 const shadow = host.attachShadow({ mode: 'closed' });
 
-// CSS 로드
-const style = document.createElement('link');
-style.rel = 'stylesheet';
-style.href = chrome.runtime.getURL('overlay.css');
+// CSS 인라인 삽입
+const style = document.createElement('style');
+style.textContent = cssText;
 shadow.appendChild(style);
 
 // 오버레이 컨테이너
@@ -29,7 +27,7 @@ const container = document.createElement('div');
 container.id = 'ivypost-container';
 shadow.appendChild(container);
 
-document.body.appendChild(host);
+document.documentElement.appendChild(host);
 
 /** ──────────────────────────────────────
  *  상태
