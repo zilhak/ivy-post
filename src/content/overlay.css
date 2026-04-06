@@ -1,0 +1,246 @@
+/* ──────────────────────────────────────
+   IvyPost 오버레이 스타일
+   Shadow DOM 내부이므로 호스트 사이트와 격리됨
+   ────────────────────────────────────── */
+
+#ivypost-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+/* ── 상태 배지 ── */
+.ivypost-badge {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 2147483647;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s;
+}
+
+.ivypost-badge[data-status='connected'] {
+  background: #10b981;
+  color: white;
+}
+
+.ivypost-badge[data-status='not-configured'] {
+  background: #9ca3af;
+  color: white;
+}
+
+.ivypost-badge[data-status='error'] {
+  background: #f59e0b;
+  color: white;
+}
+
+/* ── 핀 모드 시 DOM 하이라이트 ── */
+.ivypost-highlight {
+  position: absolute;
+  z-index: 2147483646;
+  border: 2px solid #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  pointer-events: none;
+  border-radius: 4px;
+  transition: all 0.05s ease-out;
+}
+
+/* 핀 모드 활성 시 커서 변경 */
+#ivypost-container[data-pin-mode='true'] ~ * {
+  cursor: crosshair !important;
+}
+
+/* ── 핀 ── */
+.ivypost-pin {
+  position: absolute;
+  z-index: 2147483645;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s;
+  user-select: none;
+}
+
+.ivypost-pin:hover {
+  transform: scale(1.2);
+}
+
+.ivypost-pin--uncertain {
+  background: #f59e0b;
+}
+
+.ivypost-pin--lost {
+  background: #ef4444;
+  opacity: 0.7;
+}
+
+/* ── 댓글 입력 팝업 ── */
+.ivypost-popup {
+  position: absolute;
+  z-index: 2147483647;
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.ivypost-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.ivypost-popup-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0 4px;
+}
+
+.ivypost-popup-close:hover {
+  color: #1a1a1a;
+}
+
+.ivypost-popup-author {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+}
+
+.ivypost-popup-author:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.ivypost-popup-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.ivypost-popup-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.ivypost-popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.ivypost-popup-submit {
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ivypost-popup-submit:hover {
+  background: #4f46e5;
+}
+
+/* ── 댓글 상세 ── */
+.ivypost-detail {
+  position: absolute;
+  z-index: 2147483647;
+  width: 320px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.ivypost-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ivypost-detail-header small {
+  color: #9ca3af;
+  font-size: 11px;
+  flex: 1;
+}
+
+.ivypost-detail-content {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.ivypost-replies {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 8px;
+}
+
+.ivypost-reply {
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #4b5563;
+}
+
+.ivypost-reply small {
+  display: block;
+  color: #9ca3af;
+  font-size: 10px;
+}
+
+.ivypost-detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 8px;
+}
+
+.ivypost-btn-resolve {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ivypost-btn-resolve:hover {
+  background: #e5e7eb;
+}

@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "IvyPost",
+  "version": "0.1.0",
+  "description": "QA 화면 댓글 도구 — 웹 화면 위에 핀을 찍고 피드백을 남기세요",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icon-16.svg",
+      "48": "assets/icon-48.svg",
+      "128": "assets/icon-128.svg"
+    }
+  },
+  "icons": {
+    "16": "assets/icon-16.svg",
+    "48": "assets/icon-48.svg",
+    "128": "assets/icon-128.svg"
+  },
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle-pin-mode": {
+      "suggested_key": {
+        "default": "Alt+Shift+P"
+      },
+      "description": "핀 모드 토글"
+    }
+  }
+}
