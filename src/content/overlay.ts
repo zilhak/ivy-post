@@ -83,6 +83,11 @@ container.appendChild(depthBadge);
 let baseElement: Element | null = null;
 /** 현재 깊이 오프셋 (0 = 원본, 양수 = 부모 방향) */
 let depthOffset = 0;
+/** 깊이 조절 시 고정된 마우스 좌표 */
+let anchorX = 0;
+let anchorY = 0;
+/** 깊이 고정 데드존 반경 (px) */
+const DEAD_ZONE = 5;
 
 /** baseElement에서 depthOffset만큼 부모로 올라간 요소 반환 */
 const getElementAtDepth = (): Element | null => {
@@ -100,7 +105,14 @@ const onMouseMove = (e: MouseEvent) => {
   const target = e.target as Element;
   if (host.contains(target)) return;
 
-  // 마우스가 새 요소로 이동하면 깊이 리셋
+  // 깊이 조절 중이면 데드존 내에서는 무시
+  if (depthOffset > 0) {
+    const dx = Math.abs(e.clientX - anchorX);
+    const dy = Math.abs(e.clientY - anchorY);
+    if (dx <= DEAD_ZONE && dy <= DEAD_ZONE) return;
+  }
+
+  // 마우스가 새 위치로 이동하면 깊이 리셋
   baseElement = target;
   depthOffset = 0;
   hoveredElement = target;
@@ -108,37 +120,64 @@ const onMouseMove = (e: MouseEvent) => {
   depthBadge.style.display = 'none';
 };
 
-const onKeyDown = (e: KeyboardEvent) => {
-  if (!pinModeActive || !baseElement) return;
+/** 깊이를 변경하고 하이라이트/배지를 갱신. 마우스 좌표로 앵커 고정 */
+const adjustDepth = (direction: 'up' | 'down', mouseX: number, mouseY: number) => {
+  if (!baseElement) return;
 
-  if (e.key === '=' || e.key === '+') {
+  if (direction === 'down') {
     // 더 깊은 요소 (자식 방향)
-    e.preventDefault();
-    if (depthOffset > 0) {
-      depthOffset--;
-      hoveredElement = getElementAtDepth();
-      if (hoveredElement) updateHighlight(hoveredElement);
-      depthBadge.textContent = depthOffset === 0 ? '' : `↑${depthOffset}`;
-      depthBadge.style.display = depthOffset === 0 ? 'none' : 'block';
-    }
-  } else if (e.key === '-') {
+    if (depthOffset <= 0) return;
+    depthOffset--;
+  } else {
     // 더 얕은 요소 (부모 방향)
-    e.preventDefault();
     const current = getElementAtDepth();
-    if (current?.parentElement && current.parentElement !== document.body && current.parentElement !== document.documentElement) {
-      depthOffset++;
-      hoveredElement = getElementAtDepth();
-      if (hoveredElement) updateHighlight(hoveredElement);
-      depthBadge.textContent = `↑${depthOffset}`;
-      depthBadge.style.display = 'block';
-    }
+    if (!current?.parentElement || current.parentElement === document.body || current.parentElement === document.documentElement) return;
+    depthOffset++;
   }
 
-  // 깊이 배지 위치를 하이라이트 옆에
+  // 앵커 좌표 갱신
+  anchorX = mouseX;
+  anchorY = mouseY;
+
+  hoveredElement = getElementAtDepth();
+  if (hoveredElement) updateHighlight(hoveredElement);
+
+  depthBadge.textContent = depthOffset === 0 ? '' : `↑${depthOffset}`;
+  depthBadge.style.display = depthOffset === 0 ? 'none' : 'block';
+
   if (depthBadge.style.display !== 'none') {
     depthBadge.style.top = highlight.style.top;
     depthBadge.style.left = `${parseInt(highlight.style.left) + parseInt(highlight.style.width) + 4}px`;
   }
+};
+
+/** 마우스 위치 추적 (키보드 이벤트에는 좌표가 없으므로) */
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const onMouseMoveTrack = (e: MouseEvent) => {
+  lastMouseX = e.clientX;
+  lastMouseY = e.clientY;
+};
+
+const onKeyDown = (e: KeyboardEvent) => {
+  if (!pinModeActive || !baseElement) return;
+
+  if (e.key === '=' || e.key === '+') {
+    e.preventDefault();
+    adjustDepth('down', lastMouseX, lastMouseY);
+  } else if (e.key === '-') {
+    e.preventDefault();
+    adjustDepth('up', lastMouseX, lastMouseY);
+  }
+};
+
+const onWheel = (e: WheelEvent) => {
+  if (!pinModeActive || !baseElement) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+  adjustDepth(e.deltaY > 0 ? 'up' : 'down', e.clientX, e.clientY);
 };
 
 const onClick = (e: MouseEvent) => {
@@ -359,8 +398,10 @@ const setPinMode = (active: boolean) => {
     document.head.appendChild(pinCursorStyle);
 
     document.addEventListener('mousemove', onMouseMove, true);
+    document.addEventListener('mousemove', onMouseMoveTrack, true);
     document.addEventListener('click', onClick, true);
     document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener('wheel', onWheel, { capture: true, passive: false });
   } else {
     // 커서 복원
     if (pinCursorStyle) {
@@ -369,8 +410,10 @@ const setPinMode = (active: boolean) => {
     }
 
     document.removeEventListener('mousemove', onMouseMove, true);
+    document.removeEventListener('mousemove', onMouseMoveTrack, true);
     document.removeEventListener('click', onClick, true);
     document.removeEventListener('keydown', onKeyDown, true);
+    document.removeEventListener('wheel', onWheel, true);
   }
 };
 
