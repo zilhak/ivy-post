@@ -514,8 +514,9 @@ let lastUrl = location.href;
 const cleanupUI = () => {
   // 핀 모드 해제
   if (pinModeActive) setPinMode(false);
-  // 열린 팝업 모두 제거
-  container.querySelectorAll('.ivypost-action-popup, .ivypost-popup, .ivypost-detail').forEach((el) => el.remove());
+  // 열린 팝업 + 핀 모두 제거
+  container.querySelectorAll('.ivypost-action-popup, .ivypost-popup, .ivypost-detail, .ivypost-pin').forEach((el) => el.remove());
+  currentComments = [];
   highlight.style.display = 'none';
 };
 
