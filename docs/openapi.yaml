@@ -39,6 +39,12 @@ paths:
 
     post:
       summary: 댓글 생성
+      description: |
+        서버는 요청 본문을 받아 다음 필드를 생성/초기화하여 Comment를 반환합니다:
+        - `id`: 서버에서 UUID 생성
+        - `resolved`: false로 초기화
+        - `createdAt`: 서버 시각 (ISO 8601)
+        - `replies`: 빈 배열
       requestBody:
         required: true
         content:
@@ -225,11 +231,15 @@ components:
 
     Comment:
       type: object
+      description: |
+        댓글. 서버 생성 필드(readOnly)는 생성 시 서버가 자동으로 채웁니다.
       required: [id, url, content, author, resolved, anchor, createdAt, replies]
       properties:
         id:
           type: string
           format: uuid
+          readOnly: true
+          description: 서버에서 생성
         url:
           type: string
         content:
@@ -238,6 +248,8 @@ components:
           type: string
         resolved:
           type: boolean
+          readOnly: true
+          description: 생성 시 false. CommentUpdate로만 변경
         anchor:
           $ref: "#/components/schemas/Anchor"
         screenshotId:
@@ -245,8 +257,12 @@ components:
         createdAt:
           type: string
           format: date-time
+          readOnly: true
+          description: 서버에서 생성 (ISO 8601)
         replies:
           type: array
+          readOnly: true
+          description: 생성 시 빈 배열
           items:
             $ref: "#/components/schemas/Reply"
 
